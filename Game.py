@@ -5,9 +5,13 @@ import sys
 pygame.init()
 pygame.mixer.init()
 
-# Setup Structured Canvas Window
+# Setup Virtual Canvas (Base Design Dimensions)
+BASE_WIDTH, BASE_HEIGHT = 1150, 680
+canvas = pygame.Surface((BASE_WIDTH, BASE_HEIGHT))
+
+# Setup Scalable Display Window
 WIDTH, HEIGHT = 1150, 680
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("🐼 Panda's Memory Factory Master! 🐼")
 clock = pygame.time.Clock()
 
@@ -98,27 +102,21 @@ lesson_explanations = {
 }
 
 def draw_panda_mascot(surface, center_x, center_y):
-    """Renders an adorable procedural vector Panda Mascot!"""
-    # 1. Ears
+    """Renders a vector Panda Mascot on the canvas."""
     pygame.draw.circle(surface, PANDA_BLACK, (center_x - 22, center_y - 20), 10)
     pygame.draw.circle(surface, PANDA_BLACK, (center_x + 22, center_y - 20), 10)
     
-    # 2. Main Face Oval
     pygame.draw.ellipse(surface, PANDA_WHITE, (center_x - 30, center_y - 24, 60, 50))
     pygame.draw.ellipse(surface, PANDA_BLACK, (center_x - 30, center_y - 24, 60, 50), 2)
     
-    # 3. Eye Patches (Angled Ovals)
     pygame.draw.ellipse(surface, PANDA_BLACK, (center_x - 20, center_y - 8, 14, 18))
     pygame.draw.ellipse(surface, PANDA_BLACK, (center_x + 6, center_y - 8, 14, 18))
     
-    # 4. Shiny Eyes
     pygame.draw.circle(surface, PANDA_WHITE, (center_x - 13, center_y - 2), 3)
     pygame.draw.circle(surface, PANDA_WHITE, (center_x + 13, center_y - 2), 3)
     
-    # 5. Nose & Cute Snout
     pygame.draw.ellipse(surface, PANDA_BLACK, (center_x - 5, center_y + 6, 10, 6))
     
-    # 6. Blushing Cheeks
     pygame.draw.circle(surface, PANDA_PINK, (center_x - 20, center_y + 10), 5)
     pygame.draw.circle(surface, PANDA_PINK, (center_x + 20, center_y + 10), 5)
 
@@ -156,25 +154,26 @@ def draw_3d_block(surface, x_pos, y_floor, z_depth, color_front, color_shadow, i
 
 # --- Core Mechanics Engine Execution Loop ---
 while True:
-    screen.fill(BG_DARK)
+    # 1. DRAW EVERYTHING TO VIRTUAL CANVAS
+    canvas.fill(BG_DARK)
     
     # Render Layout Screen Panels Background
-    pygame.draw.rect(screen, EDITOR_BG, (0, 0, 480, 680))
-    pygame.draw.line(screen, LIGHT_GREY, (480, 0), (480, 680), 3)
-    pygame.draw.rect(screen, (22, 20, 32), (483, 0, 667, 680))
+    pygame.draw.rect(canvas, EDITOR_BG, (0, 0, 480, 680))
+    pygame.draw.line(canvas, LIGHT_GREY, (480, 0), (480, 680), 3)
+    pygame.draw.rect(canvas, (22, 20, 32), (483, 0, 667, 680))
     
-    # --- 1. TOP INTERACTIVE LESSON SELECTOR TABS ---
+    # --- TOP INTERACTIVE LESSON SELECTOR TABS ---
     lessons_tabs = [("1. Static Array", "STATIC", 15), ("2. Dynamic Array", "DYNAMIC", 165), ("3. 2D Matrix Grid", "2DLIST", 320)]
     for tab_lbl, tab_id, x_offset in lessons_tabs:
         is_active = current_lesson == tab_id
         tab_col = ACTIVE_TAB if is_active else CONVEYOR_GREY
-        pygame.draw.rect(screen, tab_col, (x_offset, 15, 140, 35), border_radius=6)
+        pygame.draw.rect(canvas, tab_col, (x_offset, 15, 140, 35), border_radius=6)
         lbl_surf = font_ui.render(tab_lbl, True, TEXT_WHITE)
-        screen.blit(lbl_surf, (x_offset + 12, 23))
+        canvas.blit(lbl_surf, (x_offset + 12, 23))
 
-    # --- 2. CODE COMPILER FRAME PANEL LAYOUT (Left Side) ---
+    # --- CODE COMPILER FRAME PANEL LAYOUT (Left Side) ---
     title_surface = font_title.render("REAL-TIME CODE WORKBENCH", True, WIRE_YELLOW)
-    screen.blit(title_surface, (25, 80))
+    canvas.blit(title_surface, (25, 80))
     
     if current_lesson == "STATIC":
         inst = ["Lesson: Fixed Allocation (Contiguous Block Memory)", " > static_array.append('ITEM')", " > static_array.pop()"]
@@ -185,75 +184,66 @@ while True:
         
     for idx, text_str in enumerate(inst):
         color = TEXT_WHITE if idx > 0 else LIGHT_GREY
-        screen.blit(font_code.render(text_str, True, color), (25, 125 + (idx * 28)))
+        canvas.blit(font_code.render(text_str, True, color), (25, 125 + (idx * 28)))
         
     # Python Typing Input Shell box
-    pygame.draw.rect(screen, BG_DARK, (25, 235, 430, 45), border_radius=6)
-    pygame.draw.rect(screen, WIRE_YELLOW, (25, 235, 430, 45), 2, border_radius=6)
+    pygame.draw.rect(canvas, BG_DARK, (25, 235, 430, 45), border_radius=6)
+    pygame.draw.rect(canvas, WIRE_YELLOW, (25, 235, 430, 45), 2, border_radius=6)
     
     cursor_timer += 1
     if cursor_timer % 30 == 0:
         cursor_visible = not cursor_visible
         
     render_input = user_input_text + ("|" if cursor_visible else "")
-    screen.blit(font_code.render(render_input, True, TEXT_WHITE), (35, 248))
+    canvas.blit(font_code.render(render_input, True, TEXT_WHITE), (35, 248))
     
     # Terminal Display Box Output logs
-    pygame.draw.rect(screen, BG_DARK, (25, 315, 430, 140), border_radius=6)
-    screen.blit(font_ui.render("CONSOLE ARCHITECTURE LOGS:", True, LIGHT_GREY), (25, 290))
-    screen.blit(font_code.render(terminal_feedback, True, feedback_color), (35, 335))
+    pygame.draw.rect(canvas, BG_DARK, (25, 315, 430, 140), border_radius=6)
+    canvas.blit(font_ui.render("CONSOLE ARCHITECTURE LOGS:", True, LIGHT_GREY), (25, 290))
+    canvas.blit(font_code.render(terminal_feedback, True, feedback_color), (35, 335))
     
     # --- 📚 THE DYNAMIC VISUAL EXPLAINER PANEL (Bottom Left) ---
-    pygame.draw.rect(screen, EXPLAIN_BLUE, (25, 490, 430, 160), border_radius=8)
+    pygame.draw.rect(canvas, EXPLAIN_BLUE, (25, 490, 430, 160), border_radius=8)
     lines = lesson_explanations[current_lesson]
     for idx, line in enumerate(lines):
         text_color = WIRE_YELLOW if idx == 0 else TEXT_WHITE
-        screen.blit(font_explain.render(line, True, text_color), (40, 505 + (idx * 26)))
+        canvas.blit(font_explain.render(line, True, text_color), (40, 505 + (idx * 26)))
     
     # --- 🐼 PANDA MASCOT & SPEECH BUBBLE (Right Side Top) ---
-    # Draw Mascot
-    draw_panda_mascot(screen, 545, 112)
+    draw_panda_mascot(canvas, 545, 112)
     
-    # Draw Speech Box Pointer
-    pygame.draw.polygon(screen, NARRATOR_PINK, [(585, 110), (598, 102), (598, 118)])
-    
-    # Draw Speech Box
-    pygame.draw.rect(screen, NARRATOR_PINK, (595, 80, 525, 65), border_radius=12)
-    screen.blit(font_narrator.render(narrator_speech, True, BG_DARK), (610, 102))
+    # Draw Speech Box Pointer & Bubble
+    pygame.draw.polygon(canvas, NARRATOR_PINK, [(585, 110), (598, 102), (598, 118)])
+    pygame.draw.rect(canvas, NARRATOR_PINK, (595, 80, 525, 65), border_radius=12)
+    canvas.blit(font_narrator.render(narrator_speech, True, BG_DARK), (610, 102))
 
-    # --- 4. DYNAMIC VIEWPORTS PANEL ---
+    # --- DYNAMIC VIEWPORTS PANEL ---
     if current_lesson == "STATIC":
-        # Render Horizontal Side-View Conveyor Track
         r1, r2 = project_3d_horizontal(-2.2, 0.4, 2.5), project_3d_horizontal(2.2, 0.4, 2.5)
         r3, r4 = project_3d_horizontal(2.2, 0.4, 2.9), project_3d_horizontal(-2.2, 0.4, 2.9)
-        pygame.draw.polygon(screen, CONVEYOR_GREY, [r1, r2, r3, r4])
-        pygame.draw.line(screen, WIRE_YELLOW, r1, r2, 4)
+        pygame.draw.polygon(canvas, CONVEYOR_GREY, [r1, r2, r3, r4])
+        pygame.draw.line(canvas, WIRE_YELLOW, r1, r2, 4)
         
-        # Build out slots
         for slot in range(static_capacity):
             x_step = -1.6 + (slot * 0.62)
-            draw_3d_block(screen, x_step, 0.4, 2.5, BLOCK_BLUE, BLOCK_SHADOW, is_empty=(slot >= len(static_queue)))
-        screen.blit(font_ui.render(f"STATIC ARRAY CELLS UTILIZED: {len(static_queue)} / {static_capacity}", True, TEXT_WHITE), (510, 25))
+            draw_3d_block(canvas, x_step, 0.4, 2.5, BLOCK_BLUE, BLOCK_SHADOW, is_empty=(slot >= len(static_queue)))
+        canvas.blit(font_ui.render(f"STATIC ARRAY CELLS UTILIZED: {len(static_queue)} / {static_capacity}", True, TEXT_WHITE), (510, 25))
 
     elif current_lesson == "DYNAMIC":
-        # Render a glowing slime biome style container bay track layout
         r1, r2 = project_3d_horizontal(-2.2, 0.4, 2.5), project_3d_horizontal(2.2, 0.4, 2.5)
-        pygame.draw.line(screen, SLIME_GREEN, r1, r2, 6)
+        pygame.draw.line(canvas, SLIME_GREEN, r1, r2, 6)
         
         for slot in range(dynamic_capacity):
             x_step = -1.7 + (slot * (3.4 / dynamic_capacity))
-            draw_3d_block(screen, x_step, 0.4, 2.5, SLIME_GREEN, SLIME_SHADOW, is_empty=(slot >= len(dynamic_queue)))
+            draw_3d_block(canvas, x_step, 0.4, 2.5, SLIME_GREEN, SLIME_SHADOW, is_empty=(slot >= len(dynamic_queue)))
             
-        screen.blit(font_ui.render(f"DYNAMIC ARRAY ALLOCATION SIZE: {len(dynamic_queue)} / {dynamic_capacity}", True, TEXT_WHITE), (510, 25))
+        canvas.blit(font_ui.render(f"DYNAMIC ARRAY ALLOCATION SIZE: {len(dynamic_queue)} / {dynamic_capacity}", True, TEXT_WHITE), (510, 25))
 
     elif current_lesson == "2DLIST":
-        # Draw Top-View Flattened Industrial Warehouse Grid Map
-        screen.blit(font_ui.render("FACTORY Warehouse Map (2D Grid Top-View Map Mode)", True, TEXT_WHITE), (510, 25))
+        canvas.blit(font_ui.render("FACTORY Warehouse Map (2D Grid Top-View Map Mode)", True, TEXT_WHITE), (510, 25))
         
-        start_x = 590
-        start_y = 220
-        cell_size = 110
-        gap = 15
+        start_x, start_y = 590, 220
+        cell_size, gap = 110, 15
         
         for r_idx in range(3):
             for c_idx in range(3):
@@ -262,24 +252,24 @@ while True:
                 
                 is_box = matrix_grid[r_idx][c_idx] == "BOX"
                 
-                # Render base grid pocket frames
                 if is_box:
-                    pygame.draw.rect(screen, BLOCK_BLUE, (cell_x, cell_y, cell_size, cell_size), border_radius=10)
-                    pygame.draw.rect(screen, BLOCK_SHADOW, (cell_x + 6, cell_y + 6, cell_size - 12, cell_size - 12), border_radius=6)
+                    pygame.draw.rect(canvas, BLOCK_BLUE, (cell_x, cell_y, cell_size, cell_size), border_radius=10)
+                    pygame.draw.rect(canvas, BLOCK_SHADOW, (cell_x + 6, cell_y + 6, cell_size - 12, cell_size - 12), border_radius=6)
                     txt_col = TEXT_WHITE
                 else:
-                    pygame.draw.rect(screen, CONVEYOR_GREY, (cell_x, cell_y, cell_size, cell_size), border_radius=10, width=2)
+                    pygame.draw.rect(canvas, CONVEYOR_GREY, (cell_x, cell_y, cell_size, cell_size), border_radius=10, width=2)
                     txt_col = LIGHT_GREY
                 
-                # Coordinate tags inside the 2D Top View blocks
                 addr_str = f"[{r_idx}][{c_idx}]"
                 val_str = matrix_grid[r_idx][c_idx]
                 
-                addr_surf = font_code.render(addr_str, True, txt_col)
-                val_surf = font_ui.render(val_str, True, WIRE_YELLOW if is_box else LIGHT_GREY)
-                
-                screen.blit(addr_surf, (cell_x + 12, cell_y + 15))
-                screen.blit(val_surf, (cell_x + 12, cell_y + 60))
+                canvas.blit(font_code.render(addr_str, True, txt_col), (cell_x + 12, cell_y + 15))
+                canvas.blit(font_ui.render(val_str, True, WIRE_YELLOW if is_box else LIGHT_GREY), (cell_x + 12, cell_y + 60))
+
+    # 2. SCALE CANVAS TO DISPLAY WINDOW (Maintaining Aspect Ratio or Fitting Screen)
+    win_w, win_h = screen.get_size()
+    scaled_canvas = pygame.transform.smoothscale(canvas, (win_w, win_h))
+    screen.blit(scaled_canvas, (0, 0))
 
     # --- Interactive Controls Input Capture Processing Loops ---
     for event in pygame.event.get():
@@ -287,8 +277,15 @@ while True:
             pygame.quit()
             sys.exit()
             
+        elif event.type == pygame.VIDEORESIZE:
+            screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            mx, my = event.pos
+            # Map window mouse position back to virtual canvas coordinates
+            raw_mx, raw_my = event.pos
+            mx = int(raw_mx * (BASE_WIDTH / win_w))
+            my = int(raw_my * (BASE_HEIGHT / win_h))
+
             # Tab clicks triggers
             if 15 <= my <= 50:
                 if 15 <= mx <= 155:
@@ -313,7 +310,6 @@ while True:
             elif event.key == pygame.K_RETURN:
                 cmd = user_input_text.strip().replace(" ", "")
                 
-                # --- PROCESSOR PARSER ENGINE CIRCUITS BY LESSON TARGET ---
                 if current_lesson == "STATIC":
                     if cmd == "static_array.append('ITEM')":
                         if len(static_queue) < static_capacity:
@@ -342,7 +338,6 @@ while True:
                         narrator_speech = "Neat! Python managed allocation behind the scenes."
                         feedback_color = TEXT_GREEN
                         
-                        # Trigger automatic doubling simulation logic to educate user visually
                         if len(dynamic_queue) > dynamic_capacity:
                             old_cap = dynamic_capacity
                             dynamic_capacity *= 2
