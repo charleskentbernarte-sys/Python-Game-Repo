@@ -36,11 +36,16 @@ NARRATOR_PINK = (255, 115, 155)
 ACTIVE_TAB = (50, 130, 245)
 EXPLAIN_BLUE = (35, 45, 70)
 
+# Panda Mascot Colors
+PANDA_BLACK = (20, 20, 28)
+PANDA_WHITE = (245, 245, 250)
+PANDA_PINK = (255, 140, 175)
+
 # --- Fonts Configuration ---
 font_code = pygame.font.SysFont("menlo", 14)
 font_ui = pygame.font.SysFont("arial", 15, bold=True)
 font_title = pygame.font.SysFont("arial", 18, bold=True)
-font_narrator = pygame.font.SysFont("arial", 15, bold=True)
+font_narrator = pygame.font.SysFont("arial", 14, bold=True)
 font_explain = pygame.font.SysFont("arial", 14)
 
 # --- Complete Game Architecture State ---
@@ -65,7 +70,7 @@ cursor_visible = True
 cursor_timer = 0
 terminal_feedback = "FACTORY BOOTED: Choose a lesson tab above!"
 feedback_color = TEXT_GREEN
-narrator_speech = "(Panda): Welcome! Pick a structure to control using your Python compiler panel!"
+narrator_speech = "Welcome! Pick a structure to control using your Python compiler panel!"
 
 # --- Educational Encyclopedia Data ---
 lesson_explanations = {
@@ -91,6 +96,31 @@ lesson_explanations = {
         "  horizontal row and vertical column to drop your box."
     ]
 }
+
+def draw_panda_mascot(surface, center_x, center_y):
+    """Renders an adorable procedural vector Panda Mascot!"""
+    # 1. Ears
+    pygame.draw.circle(surface, PANDA_BLACK, (center_x - 22, center_y - 20), 10)
+    pygame.draw.circle(surface, PANDA_BLACK, (center_x + 22, center_y - 20), 10)
+    
+    # 2. Main Face Oval
+    pygame.draw.ellipse(surface, PANDA_WHITE, (center_x - 30, center_y - 24, 60, 50))
+    pygame.draw.ellipse(surface, PANDA_BLACK, (center_x - 30, center_y - 24, 60, 50), 2)
+    
+    # 3. Eye Patches (Angled Ovals)
+    pygame.draw.ellipse(surface, PANDA_BLACK, (center_x - 20, center_y - 8, 14, 18))
+    pygame.draw.ellipse(surface, PANDA_BLACK, (center_x + 6, center_y - 8, 14, 18))
+    
+    # 4. Shiny Eyes
+    pygame.draw.circle(surface, PANDA_WHITE, (center_x - 13, center_y - 2), 3)
+    pygame.draw.circle(surface, PANDA_WHITE, (center_x + 13, center_y - 2), 3)
+    
+    # 5. Nose & Cute Snout
+    pygame.draw.ellipse(surface, PANDA_BLACK, (center_x - 5, center_y + 6, 10, 6))
+    
+    # 6. Blushing Cheeks
+    pygame.draw.circle(surface, PANDA_PINK, (center_x - 20, center_y + 10), 5)
+    pygame.draw.circle(surface, PANDA_PINK, (center_x + 20, center_y + 10), 5)
 
 def project_3d_horizontal(x, y, z):
     """3D side view coordinate projection for linear structures."""
@@ -180,10 +210,16 @@ while True:
         text_color = WIRE_YELLOW if idx == 0 else TEXT_WHITE
         screen.blit(font_explain.render(line, True, text_color), (40, 505 + (idx * 26)))
     
-    # --- 🐼 PANDA NARRATOR BUBBLE (Right Side Top) ---
-    pygame.draw.rect(screen, NARRATOR_PINK, (510, 80, 610, 65), border_radius=12)
-    pygame.draw.polygon(screen, NARRATOR_PINK, [(550, 145), (565, 145), (557, 155)])
-    screen.blit(font_narrator.render(narrator_speech, True, BG_DARK), (525, 102))
+    # --- 🐼 PANDA MASCOT & SPEECH BUBBLE (Right Side Top) ---
+    # Draw Mascot
+    draw_panda_mascot(screen, 545, 112)
+    
+    # Draw Speech Box Pointer
+    pygame.draw.polygon(screen, NARRATOR_PINK, [(585, 110), (598, 102), (598, 118)])
+    
+    # Draw Speech Box
+    pygame.draw.rect(screen, NARRATOR_PINK, (595, 80, 525, 65), border_radius=12)
+    screen.blit(font_narrator.render(narrator_speech, True, BG_DARK), (610, 102))
 
     # --- 4. DYNAMIC VIEWPORTS PANEL ---
     if current_lesson == "STATIC":
@@ -259,17 +295,17 @@ while True:
                     current_lesson = "STATIC"
                     user_input_text = "static_array.append('ITEM')"
                     terminal_feedback = "LOADED: Fixed size array testing ground."
-                    narrator_speech = "(Panda): Look down at the blue explanation board to learn about Fixed memory allocation!"
+                    narrator_speech = "Look down at the blue board to learn about Fixed memory allocation!"
                 elif 165 <= mx <= 305:
                     current_lesson = "DYNAMIC"
                     user_input_text = "dynamic_array.append('ITEM')"
                     terminal_feedback = "LOADED: Dynamic Resizable array vector ground."
-                    narrator_speech = "(Panda): Try appending past the 3 boxes to see the array automatically grow!"
+                    narrator_speech = "Try appending past the 3 boxes to see the array automatically grow!"
                 elif 320 <= mx <= 460:
                     current_lesson = "2DLIST"
                     user_input_text = "warehouse[0][2] = 'BOX'"
                     terminal_feedback = "LOADED: 2D Multi-dimensional index plane."
-                    narrator_speech = "(Panda): Look! We can now inspect the 2D List directly from a Top-Down view grid map!"
+                    narrator_speech = "Look! We can now inspect the 2D List directly from a Top-Down view grid map!"
                     
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_BACKSPACE:
