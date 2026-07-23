@@ -59,7 +59,7 @@ current_lesson = "STATIC"  # Options: "STATIC", "DYNAMIC", "2DLIST"
 static_queue = ["DATA", "DATA", "DATA"]
 static_capacity = 6
 
-dynamic_queue = ["DATA", "DATA"]
+dynamic_queue = []
 dynamic_capacity = 3  
 
 matrix_grid = [
